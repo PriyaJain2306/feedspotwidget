@@ -22,8 +22,8 @@ export default function General({ settings, setSettings }) {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto mt-12 border border-gray-300 rounded-xl shadow-sm bg-white">
-      <div className="px-6 py-4 border-b border-gray-300 bg-gray-100 rounded-t-xl">
+    <div className="w-full max-w-2xl mx-auto mt-12 border border-gray-300 shadow-sm bg-white">
+      <div className="px-6 py-4 border-b border-gray-300 bg-gray-100">
         <h2 className="text-blue-800 font-semibold">General</h2>
       </div>
       <div className="p-4 space-y-4">

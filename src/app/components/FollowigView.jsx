@@ -12,7 +12,7 @@ import WidgetPreview from './PreviewWidfet';
 export default function FollowingView({ view, setView }) {
   return (
     <div className="p-4 space-y-6">
-      <div className="p-4 bg-white rounded shadow-md border-b">
+      <div className="p-4 bg-white shadow-md border-b">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-700">Following View</h2>
           <div className="flex items-center space-x-4">

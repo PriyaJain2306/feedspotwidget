@@ -1,11 +1,11 @@
 import React from "react";
 import { ChevronRight, HelpCircle } from "lucide-react";
 
-export default function RssfeedUrl({RssfeedUrl, setRssfeedUrl}) {
+export default function RssfeedUrl({settings, setSettings}) {
   return (
-    <div className="w-full max-w-2xl mx-auto mt-12 border border-gray-300 rounded-xl shadow-sm bg-white">
+    <div className="w-full max-w-2xl mx-auto mt-12 border border-gray-300  shadow-sm bg-white">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-300 bg-gray-100 rounded-t-xl">
+      <div className="px-6 py-4 border-b border-gray-300 bg-gray-200 ">
         <h1 className="text-xl font-semibold text-blue-800">RSS Feed URL</h1>
       </div>
 
@@ -22,9 +22,9 @@ export default function RssfeedUrl({RssfeedUrl, setRssfeedUrl}) {
               type="text"
               className="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
               placeholder="http://rss.feedspot.com/folder/736245/rss"  onChange={(e) => setRssfeedUrl(e.target.value)}
-  value={RssfeedUrl}
+  value={settings.rssfeedUrl} // Assuming settings.rssfeedUrl is the state variable for the URL
             />
-            console.log(RssfeedUrl)
+         
             <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition">
               <ChevronRight className="w-5 h-5" />
             </button>

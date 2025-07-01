@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 
-
-.body{
-background-color: #ffffff;
+body {
+    background-color: #d75142; /* Misty rose */
 }

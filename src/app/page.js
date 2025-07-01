@@ -15,8 +15,7 @@ export default function Home() {
   const [collapsed, setCollapsed] = useState(false);
   const [view, setView] = useState('matrix');
   const [feeds, setFeeds] = useState([]);
-    const [selectedCategory, setSelectedCategory] = useState('');
-    const[rssfeedUrl, setRssfeedUrl] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('Technology'); // Default category
 
   const [settings, setSettings] = useState({
     rssfeedUrl: 'priya',
@@ -87,7 +86,7 @@ useEffect(() => {
 
 
   return (
-    <div className="flex min-h-screen overflow-auto bg-gray-50">
+    <div className="flex min-h-screen overflow-auto bg-white">
       {/* Sidebar */}
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
 
@@ -109,7 +108,7 @@ useEffect(() => {
           <div className="flex flex-col lg:flex-row flex-wrap gap-6 w-full">
             {/* Left: Editing Sections */}
             <div className="flex-1 min-w-[280px] flex flex-col gap-4">
-              <RssfeedUrl  rssfeedUrl={rssfeedUrl} setRssfeedUrl={setRssfeedUrl}/>
+              <RssfeedUrl  settings={settings} setSettings={setSettings}/>
               <FollowingView view={view} setView={setView} />
               <General settings={settings} setSettings={setSettings} />
               <FeedTitle settings={settings} setSettings={setSettings} />
