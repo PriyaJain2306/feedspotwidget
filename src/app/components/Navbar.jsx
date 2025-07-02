@@ -17,7 +17,7 @@ const Navbar = ({ collapsed, onCategorySelect }) => {
       }
 
       try {
-        const response = await fetch(`http://localhost:8000/api/get_categories.php`);
+        const response = await fetch(`http://localhost:8080/backend/api/get_categories.php`);
         const data = await response.json();
 
         const filtered = (data.data || []).filter(
