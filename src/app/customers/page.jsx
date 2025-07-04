@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 export default function Customers() {
   const [collapsed, setCollapsed] = useState(false);
@@ -31,6 +32,7 @@ export default function Customers() {
   ];
 
   return (
+    <ProtectedRoute>
     <div className="flex min-h-screen bg-white">
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       <div className="flex-1 flex flex-col">
@@ -63,6 +65,8 @@ export default function Customers() {
           </div>
         </div>
       </div>
+     
     </div>
+     </ProtectedRoute>
   );
 }

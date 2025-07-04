@@ -3,11 +3,13 @@
 import React, { useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 export default function WidgetsExamples() {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
+    <ProtectedRoute>
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       <div className="flex-1 flex flex-col">
@@ -100,5 +102,6 @@ export default function WidgetsExamples() {
         </div>
       </div>
     </div>
+    </ProtectedRoute>
   );
 }

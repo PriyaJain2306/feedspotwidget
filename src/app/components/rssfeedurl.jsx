@@ -18,12 +18,19 @@ export default function RssfeedUrl({settings, setSettings}) {
             <HelpCircle className="w-4 h-4 text-gray-400" />
           </label>
           <div className="flex items-center gap-2">
-            <input
-              type="text"
-              className="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="http://rss.feedspot.com/folder/736245/rss"  onChange={(e) => setRssfeedUrl(e.target.value)}
-  value={settings.rssfeedUrl} // Assuming settings.rssfeedUrl is the state variable for the URL
-            />
+           <input
+  type="text"
+  className="flex-1 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+  placeholder="http://rss.feedspot.com/folder/736245/rss"
+  onChange={(e) =>
+    setSettings((prev) => ({
+      ...prev,
+      rssfeedUrl: e.target.value,
+    }))
+  }
+  value={settings.rssfeedUrl || ''} // 👈 fallback for undefined
+/>
+
          
             <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded transition">
               <ChevronRight className="w-5 h-5" />

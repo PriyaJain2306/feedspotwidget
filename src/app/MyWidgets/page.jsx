@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import { useRouter } from 'next/navigation';
+import ProtectedRoute from '../components/ProtectedRoute';
 
 export default function MyWidgets() {
   const [collapsed, setCollapsed] = useState(false);
@@ -63,6 +64,7 @@ export default function MyWidgets() {
   };
 
   return (
+    <ProtectedRoute>
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       <div className="flex-1 flex flex-col">
@@ -194,5 +196,6 @@ export default function MyWidgets() {
         </div>
       </div>
     </div>
+    </ProtectedRoute>
   );
 }

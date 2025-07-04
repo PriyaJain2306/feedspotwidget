@@ -2,10 +2,12 @@
 import React from "react";
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
+import ProtectedRoute from "../components/ProtectedRoute";
 export default function WidgetCatlog() {
   const [collapsed, setCollapsed] = React.useState(false);
 
   return (
+    <ProtectedRoute>
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
       <div className="flex-1 flex flex-col">
@@ -17,5 +19,6 @@ export default function WidgetCatlog() {
         </div>
       </div>
     </div>
+    </ProtectedRoute>
   );
 }
