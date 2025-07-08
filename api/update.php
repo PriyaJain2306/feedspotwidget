@@ -1,9 +1,34 @@
 <?php
 // Handle CORS
-header("Access-Control-Allow-Origin: http://localhost:3000"); // or "*"
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header("Content-Type: application/json");
 
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200); // Important: respond OK
+    exit(); // Important: stop script here for preflight
+}
+require_once 'Response.php'; // Response class for consistent API response
+require_once 'jwt_util.php'; // JWT validation
+
+// Extract JWT token from Authorization header
+$headers = getallheaders();
+$authHeader = $headers['Authorization'] ?? '';
+
+if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+    echo (new Response(UNAUTHORIZED, 'Authorization token missing'))->toJson();
+    exit;
+}
+
+$token = $matches[1];
+
+// Validate JWT
+$payload = validate_jwt($token);
+if (!$payload || !isset($payload['id'])) {
+    echo (new Response(UNAUTHORIZED, 'Invalid or expired token'))->toJson();
+    exit;
+}
 
 // Handle preflight request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -29,6 +54,7 @@ $updateData = [
     'widget_name' => $data['widget_name'] ?? '',
     'feed_url' => $data['feed_url'] ?? '',
     'category_name' => $data['category_name'] ?? '',
+    'view' => $data['view'] , // Default to 'list' if not provided
     'settings' => json_encode($data['settings'] ?? []), // Store settings as JSON string
 ];
 
