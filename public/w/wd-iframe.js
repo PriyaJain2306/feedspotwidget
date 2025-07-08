@@ -9,5 +9,5 @@
         WidgetId: widgetId,
         WidgetHeight: widgetHeight,
         WidgetWidth: widgetWidth + 'px'
-    }, "http://localhost:3000");
+    }, "http://localhost:3000/w/widget.js");
 })();

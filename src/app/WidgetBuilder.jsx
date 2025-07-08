@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import './globals.css';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -71,11 +71,11 @@ const defaultSettings = {
   const searchParams = useSearchParams();
   const router = useRouter();
   const widgetId = searchParams.get('id');
-  
+  const { token, username, isLoggedIn } = getAuthToken();
 
   // Load widget settings if editing
  useEffect(() => {
-  const token = getAuthToken();
+ 
 
   if (!token) {
     console.error('No token found');
@@ -121,7 +121,7 @@ const defaultSettings = {
   }
 }, [widgetId]);
 
- const token = getAuthToken();
+ 
 
   if (!token) {
     console.error('No token found');
@@ -157,9 +157,10 @@ const defaultSettings = {
       widget_name: settings.widgetName,
       feed_url: settings.rssfeedUrl,
       category_name: selectedCategory,
+      view: view,
       settings,
       userid: 1,
-      username: 'demoUser',
+      username: username || 'anonymous',
     };
 
     const url = widgetId
@@ -171,7 +172,7 @@ const defaultSettings = {
     try {
       const res = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' ,'Authorization': token },
         body: JSON.stringify(finalPayload),
       });
 

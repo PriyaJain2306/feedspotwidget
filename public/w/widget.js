@@ -1,149 +1,198 @@
 (function () {
-  const scriptTag = document.currentScript;
-  const widgetId = scriptTag.getAttribute("data-widget-id");
-  if (!widgetId) return;
+  const currentScript = document.currentScript;
+  const widgetId = currentScript.getAttribute("data-widget-id");
+  if (!widgetId) return console.error("Widget ID is missing");
 
-  const container = document.createElement("div");
-  container.id = `widget-${widgetId}`;
-  scriptTag.parentNode.insertBefore(container, scriptTag.nextSibling);
-
-  const formatDate = (dateStr, format = "Month DD, YYYY") => {
-    const date = new Date(dateStr);
-    if (format === "Month DD, YYYY") {
-      return date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      });
-    }
-    return date.toLocaleDateString();
-  };
-
-  fetch(`http://localhost:8080/backend/api/get_widget_by_id.php?id=${widgetId}`)
+  const apiUrl = `http://localhost:8080/backend/api/get_widget_by_id.php?id=${widgetId}`;
+  fetch(apiUrl)
     .then(res => res.json())
     .then(data => {
-      if (!data.data) throw new Error("Invalid widget data");
-
-      const settings = JSON.parse(data.data.settings || "{}");
-      const feedUrl = data.data.feed_url;
-      const widgetName = data.data.widget_name || "My Feed";
-
-      if (!feedUrl) {
-        container.innerHTML = "Feed URL missing!";
-        return;
+      let { view, settings, feed_url } = data.data;
+      
+      try {
+        if (typeof settings === "string") {
+          settings = JSON.parse(settings);
+        }
+      } catch (e) {
+        console.error("Failed to parse settings:", e);
       }
+      console.log("Widget settings:", settings);
 
-      fetch(feedUrl)
+      if (!feed_url) return console.error("Feed URL missing");
+
+      return fetch(feed_url)
         .then(res => res.json())
-        .then(feedData => {
-          const feeds = Array.isArray(feedData.data) ? feedData.data : [];
-          const sliced = feeds.slice(0, settings.posts || 10);
+        .then(feed => {
+          const feeds = feed.data;
+          if (!feeds.length) return console.warn("No feeds found");
 
-          const wrapper = document.createElement("div");
-          wrapper.style.width = settings.useResponsive ? "100%" : `${settings.width}px`;
-          wrapper.style.height = `${settings.height}px`;
-          wrapper.style.padding = `${settings.padding}px`;
-          wrapper.style.border = `1px solid ${settings.borderColor}`;
-          wrapper.style.borderRadius = settings.corner === "rounded" ? "10px" : "0";
-          wrapper.style.background = settings.background;
-          wrapper.style.overflowY = "auto";
-          wrapper.style.boxSizing = "border-box";
-          wrapper.style.margin = "auto";
+          const container = document.createElement("div");
+          container.style.width = settings.useResponsive ? "20%" : `${settings.width || 350}px`;
+          container.style.height = `${settings.height}px`;
+          container.style.padding = `${settings.padding || 5}px`;
+          container.style.textAlign = settings.textAlign || "center";
+          container.style.border = `1px solid ${settings.borderColor || "#ccc"}`;
+          container.style.borderRadius = settings.corner === "rounded" ? "10px" : "0px";
+          container.style.overflowY = "auto";
+          container.style.margin = "auto";
+          container.style.backgroundColor = settings.background || "#f1f1f1";
+          container.style.fontFamily = "sans-serif";
+          container.style.boxShadow = "0 1px 3px rgba(0,0,0,0.1)";
 
+          // ✅ Header
           if (settings.isCustomEnabled !== false) {
             const header = document.createElement("div");
-            header.textContent = settings.mainTitle || widgetName;
-            header.style.background = settings.bgColor;
-            header.style.color = settings.fontColor;
-            header.style.textAlign = settings.textAlign;
-            header.style.fontWeight = settings.bold ? "bold" : "normal";
-            header.style.fontSize = `${settings.fontSize}px`;
+            header.style.backgroundColor = settings.bgColor || "#f1f1f1";
             header.style.padding = "10px";
-            wrapper.appendChild(header);
+            header.style.fontSize = `${settings.fontSize || 16}px`;
+            header.style.fontWeight = settings.bold ? "bold" : "normal";
+            header.style.color = settings.fontColor || "#000";
+            header.style.textAlign = settings.textAlign || "center";
+            header.style.borderBottom = "1px solid #ddd";
+            header.style.marginBottom = "10px";
+
+            const title = settings.mainTitle?.trim() || "My Feed Title";
+            if (settings.mainTitleLink) {
+              const link = document.createElement("a");
+              link.href = settings.mainTitleLink;
+              link.textContent = title;
+              link.target = "_blank";
+              link.rel = "noopener noreferrer";
+              link.style.textDecoration = "none";
+              link.style.color = "inherit";
+              link.style.cursor = "pointer";
+              header.appendChild(link);
+            } else {
+              header.textContent = title;
+            }
+
+            container.appendChild(header);
           }
 
-          const list = document.createElement("div");
-          list.style.display = "flex";
-          list.style.flexDirection = "column";
-          list.style.gap = `${settings.spacing}px`;
+          // ✅ Feed Container
+          const feedContainer = document.createElement("div");
+          feedContainer.style.display = ["card", "matrix", "matrix-card"].includes(view) ? "flex" : "block";
+          feedContainer.style.flexDirection = view === "card" ? "row" : "column";
+          feedContainer.style.flexWrap = view === "matrix" || view === "matrix-card" ? "wrap" : "nowrap";
+          feedContainer.style.gap = "16px";
+          feedContainer.style.rowGap = "16px";
+          feedContainer.style.columnGap = "16px";
 
-          sliced.forEach(feed => {
+          if (view === "matrix") {
+            feedContainer.style.display = "grid";
+            feedContainer.style.gridTemplateColumns = "repeat(2, 1fr)";
+          }
+
+          if (view === "matrix-card") {
+            feedContainer.style.display = "grid";
+            feedContainer.style.gridTemplateColumns = "repeat(auto-fit, minmax(250px, 1fr))";
+          }
+
+          if (view === "card") {
+            feedContainer.style.overflowX = "auto";
+            feedContainer.style.padding = "0 5px";
+          }
+
+          feeds.slice(0, settings.posts || 5).forEach(feed => {
             const item = document.createElement("div");
             item.style.background = "#fff";
-            item.style.border = "1px solid #ccc";
-            item.style.borderRadius = "6px";
-            item.style.padding = "10px";
-
-            // Title
-            if (settings.showTitle !== false && feed.title) {
-              const title = document.createElement("div");
-              title.textContent = feed.title.length > settings.titleMax
-                ? feed.title.slice(0, settings.titleMax) + "..."
-                : feed.title;
-              title.style.fontSize = `${settings.titleSize}px`;
-              title.style.fontWeight = settings.boldTitle ? "bold" : "normal";
-              title.style.color = settings.titleColor;
-              list.appendChild(title);
-              item.appendChild(title);
+            item.style.border = "1px solid #e5e7eb";
+            item.style.borderRadius = "12px";
+            item.style.padding = "12px";
+            item.style.boxShadow = "0 2px 6px rgba(0,0,0,0.05)";
+            item.style.display = "flex";
+            item.style.flexDirection = "column";
+            item.style.height = "100%";
+            item.style.boxSizing = "border-box";
+            if (view === "card") {
+              item.style.minWidth = "280px";
+              item.style.flex = "0 0 auto";
             }
 
             // Image
-            if (settings.thumbnail !== "none" && feed.image_url) {
+            if (feed.image_url) {
               const img = document.createElement("img");
               img.src = feed.image_url;
-              img.style.width = "100%";
-              img.style.borderRadius = "4px";
-              img.style.margin = "5px 0";
+              img.alt = feed.title;
+              img.style.width = view === "list" ? "100px" : "100%";
+              img.style.maxHeight = "140px";
+              img.style.objectFit = "cover";
+              img.style.borderRadius = "6px";
+              img.style.marginBottom = "8px";
               item.appendChild(img);
             }
 
+            // Title
+            if (settings.showTitle !== false && feed.title) {
+              const h3 = document.createElement("h3");
+              h3.textContent =
+                feed.title.length > settings.titleMax
+                  ? feed.title.slice(0, settings.titleMax) + "..."
+                  : feed.title;
+              h3.style.fontSize = `${settings.titleSize || 14}px`;
+              h3.style.fontWeight = settings.boldTitle ? "bold" : "normal";
+              h3.style.color = settings.titleColor || "#000";
+              h3.style.margin = "8px 0 4px 0";
+              h3.style.lineHeight = "1.2";
+              item.appendChild(h3);
+            }
+
             // Description
-            if (settings.showDesc && feed.description) {
-              const desc = document.createElement("div");
-              desc.textContent = feed.description.length > settings.descMax
-                ? feed.description.slice(0, settings.descMax) + "..."
-                : feed.description;
-              desc.style.fontSize = `${settings.descSize}px`;
-              desc.style.fontWeight = settings.boldDesc ? "bold" : "normal";
-              desc.style.color = settings.descColor;
-              item.appendChild(desc);
+            if (settings.showDesc !== false && feed.description) {
+              const p = document.createElement("p");
+              p.textContent =
+                feed.description.length > settings.descMax
+                  ? feed.description.slice(0, settings.descMax) + "..."
+                  : feed.description;
+              p.style.fontSize = `${settings.descSize || 12}px`;
+              p.style.fontWeight = settings.boldDesc ? "bold" : "normal";
+              p.style.color = settings.descColor || "#000";
+              p.style.margin = "4px 0";
+              p.style.lineHeight = "1.4";
+              item.appendChild(p);
             }
 
             // Meta
-            if (settings.showMeta) {
+            if (settings.showMeta !== false) {
               const meta = document.createElement("div");
-              meta.textContent = `${feed.author || ""}${feed.date ? " • " + formatDate(feed.date, settings.dateFormat) : ""}`;
-              meta.style.fontSize = "10px";
+              meta.style.fontSize = "11px";
               meta.style.color = "#666";
+              meta.style.marginTop = "8px";
+
+              const date = feed.date
+                ? new Date(feed.date).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })
+                : "";
+
+              meta.textContent = `${feed.author ? "By " + feed.author + " • " : ""}${date}`;
               item.appendChild(meta);
             }
 
-            // Read more
-            if (settings.showLink && feed.orignal_link) {
+            // Read More
+            if (settings.showLink !== false && feed.orignal_link) {
               const link = document.createElement("a");
               link.href = feed.orignal_link;
-              link.textContent = "Read more";
               link.target = "_blank";
-              link.style.display = "block";
-              link.style.marginTop = "5px";
+              link.rel = "noopener noreferrer";
+              link.textContent = "Read more";
+              link.style.display = "inline-block";
+              link.style.marginTop = "6px";
               link.style.fontSize = "12px";
-              link.style.color = "#007BFF";
+              link.style.color = "#3b82f6";
+              link.style.textDecoration = "none";
+              link.style.fontWeight = "500";
               item.appendChild(link);
             }
 
-            list.appendChild(item);
+            feedContainer.appendChild(item);
           });
 
-          wrapper.appendChild(list);
-          container.appendChild(wrapper);
-        })
-        .catch((err) => {
-          console.error("Feed load failed", err);
-          container.innerHTML = "Failed to load feed.";
+          container.appendChild(feedContainer);
+          currentScript.parentNode.insertBefore(container, currentScript);
         });
     })
-    .catch((err) => {
-      console.error("Widget load failed", err);
-      container.innerHTML = "Failed to load widget.";
-    });
+    .catch(err => console.error("Widget load failed:", err));
 })();

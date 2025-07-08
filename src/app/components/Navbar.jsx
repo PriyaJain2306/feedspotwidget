@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
+import { getAuthToken } from '../utils/auth';
 
 const Navbar = ({ collapsed, onCategorySelect }) => {
   const [query, setQuery] = useState('');
@@ -10,6 +11,7 @@ const Navbar = ({ collapsed, onCategorySelect }) => {
   const inputRef = useRef();
 
   useEffect(() => {
+    const { token, username, isLoggedIn } = getAuthToken();
     const fetchCategories = async () => {
       if (query.length < 1) {
         setCategories([]);
@@ -17,7 +19,14 @@ const Navbar = ({ collapsed, onCategorySelect }) => {
       }
 
       try {
-        const response = await fetch(`http://localhost:8080/backend/api/get_categories.php`);
+        const response = await fetch(`http://localhost:8080/backend/api/get_categories.php`,{
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+         'Authorization': token 
+      },
+    
+    });
         const data = await response.json();
 
         const filtered = (data.data || []).filter(
